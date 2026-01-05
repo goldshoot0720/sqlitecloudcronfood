@@ -1,0 +1,33 @@
+name: Fetch SQLiteCloud Food Table
+
+on:
+  workflow_dispatch:   # 手動觸發
+  schedule:
+    - cron: "5 */5 * * *"  # 每5小時5分鐘執行一次
+
+jobs:
+  fetch-food:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24'
+
+      - name: Install Dependencies
+        run: npm install @sqlitecloud/drivers
+
+      - name: Query SQLiteCloud food table
+        env:
+          SQLITECLOUD_URL: ${{ secrets.SQLITECLOUD_URL }}
+        run: node fetch-food.js
+
+      - name: Upload Result
+        uses: actions/upload-artifact@v6
+        with:
+          name: food-json
+          path: food.json
