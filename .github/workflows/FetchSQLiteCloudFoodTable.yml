@@ -1,7 +1,7 @@
 name: Fetch SQLiteCloud Food Table
 
 on:
-  workflow_dispatch:   # 可手動觸發
+  workflow_dispatch:   # 手動觸發
   schedule:            # 每天凌晨 1 點自動執行
     - cron: "0 1 * * *"
 
@@ -16,3 +16,35 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install @sqlitecloud/drivers
+
+      - name: Query SQLiteCloud food table
+        env:
+          SQLITECLOUD_URL: ${{ secrets.SQLITECLOUD_URL }}
+        run: |
+          node -e "
+          import fs from 'fs';
+          import { Database } from '@sqlitecloud/drivers';
+
+          const db = new Database(process.env.SQLITECLOUD_URL);
+
+          (async () => {
+            try {
+              const result = await db.sql`SELECT * FROM food;`;
+              fs.writeFileSync('food.json', JSON.stringify(result, null, 2));
+              console.log('Saved food.json with', result.length, 'records');
+            } catch (err) {
+              console.error('Query error:', err);
+              process.exit(1);
+            }
+          })();
+          "
+
+      - name: Upload Result
+        uses: actions/upload-artifact@v3
+        with:
+          name: food-json
+          path: food.json
