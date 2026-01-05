@@ -31,3 +31,6 @@ jobs:
         with:
           name: food-json
           path: food.json
+
+      - name: Print food.json
+        run: cat food.json
