@@ -1,7 +1,7 @@
-// fetch-food.js
 import fs from 'fs';
 import { Database } from '@sqlitecloud/drivers';
 
+// 連到正確的資料庫
 const db = new Database(process.env.SQLITECLOUD_URL);
 
 (async () => {
